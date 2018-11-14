@@ -1,5 +1,6 @@
-//Implementation of defined routes. For now, simple
-//JSON messages are returned
+//Samantha Long
+
+//Implementation of defined routes.
 
 var MongoClient = require('mongodb').MongoClient;
 const url = "mongodb://omega.unasec.info";
@@ -9,7 +10,7 @@ exports.create_a_review = function(req, res) {
     MongoClient.connect(url, function(err, db) {
   if (err) throw err;
   var dbo = db.db("amazon");
-  var myobj = {day: 1.0, _id: {product: {title: "Test"}} };
+  var myobj = {day: 1.0, _id: {product: {title: "Test"}} }; //Would add more fields if actually adding real review
   dbo.collection("reviews").insertOne(myobj, function(err, res) {
     if (err) throw err;
     console.log("1 document inserted");
@@ -37,7 +38,7 @@ exports.update_a_review = function(req, res) {
   if (err) throw err;
   var dbo = db.db("amazon");
   var myquery = {"reviewID": `${req.params.reviewid}`};
-  var newvalues = { $set: {product:{title: "Changed"}} };
+  var newvalues = { $set: {product:{title: "Changed"}} }; //could add more fields is necessary
   dbo.collection("reviews").updateOne(myquery, newvalues, function(err, res) {
     if (err) throw err;
     console.log("1 document updated");
@@ -92,10 +93,7 @@ exports.average_stars = function(req, res) {
     MongoClient.connect(url, function(err, db) {
   if (err) throw err;
   var dbo = db.db("amazon");
-  var query = { $match: {"review.date": {$lt: req.from_date, $gt: req.to_date}}, 
-      "$group": {
-        _id: null,
-        "average": { $avg: {$sum: "$review.star_rating"}}}};
+  var query = [{$match: {"review.date": {$lt: req.from_date, $gt: req.to_date}}}, {$group: {_id: null,"average": { $avg: {$sum: "$review.star_rating"}}}}];
   dbo.collection("reviews").aggregate(query).toArray(function(err, result) {
     if (err) throw err;
     console.log(result);
@@ -108,7 +106,7 @@ exports.helpful_votes = function(req, res) {
     MongoClient.connect(url, function(err, db) {
   if (err) throw err;
   var dbo = db.db("amazon");
-  var query = {[{}]};
+  var query = [{$match: {"product.id": req.params.prodid}}, {$group:{_id:null, "average": {$avg: {$sum:"$votes.helpful_votes"}}}}];
   dbo.collection("reviews").aggregate(query).toArray(function(err, result) {
     if (err) throw err;
     console.log(result);
@@ -121,7 +119,7 @@ exports.average_review = function(req, res) {
    MongoClient.connect(url, function(err, db) {
   if (err) throw err;
   var dbo = db.db("amazon");
-  var query = {  };
+  var query = [{$match: {customer_id: "$req.params.custid"}},{$group: {_id: "$customer_id"}},{$count: "num_reviews"}];
   dbo.collection("reviews").aggregate(query).toArray(function(err, result) {
     if (err) throw err;
     console.log(result);
