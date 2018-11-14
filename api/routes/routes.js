@@ -15,9 +15,21 @@ module.exports = function(app) {
 
   //Route to retrieve items by stars
   app.route('/review/:n/:stars')
-    .get(reviews.read_a_review);
+    .get(reviews.read_a_review_stars);
     
+    //Retrieve item by date
    app.route('/review/:n/:from_date/:to_date')
-    .get(reviews.read_a_review);
+    .get(reviews.read_a_review_date);
     
+    //Get average of review stars over time
+    app.route('/review/:from/:to')
+    .get(reviews.average_stars);
+    
+    //Get average of helpful votes by product
+    app.route('/review/helpful/:prodid')
+    .get(reviews.helpful_votes);
+    
+    //Get average review info for a customer by category
+    app.route('/review/info/:custid')
+    .get(reviews.average_review);
 };
